@@ -1,70 +1,83 @@
-# Getting Started with Create React App
+# 🌍 Global Transfer UI (XOF ↔ EUR/USD)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A premium, interactive, and highly cinematic decentralized application (dApp) interface built for seamless cross-border stablecoin transfers. This project represents the frontend architecture for exchanging CFA Francs (XOF) with global reserve currencies (EUR, USD) through blockchain technology.
 
-## Available Scripts
+Designed and developed by **CAPSI Boyz**.
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## ✨ Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Immersive 3D Visuals:** A highly optimized React Three Fiber integration featuring a wireframe HoloGlobe with dynamic orbital data packets that visually represents global financial routing.
+- **Cinematic UX/UI:** Butter-smooth page transitions (Framer Motion), scroll-linked stagger animations (Lenis & GSAP), and ultra-premium Glassmorphism aesthetics.
+- **Bidirectional Swaps:** A fully dynamic Transfer Dashboard that allows real-time swapping between source and target currencies (XOF ↔ USD/EUR).
+- **Dual-Theme Engine:** Complete integration of both an immersive `Dark Abyss` theme and an ultra-crisp `Light White` theme with zero performance overhead.
+- **Wallet-Ready Architecture:** Includes a mocked Web3 connection state (Zustand) ready to be plugged into Ethers.js or Wagmi for live testnet operations on Sepolia.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 🛠️ Technology Stack
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **Framework:** React 18 (TypeScript) + Vite
+- **Styling:** TailwindCSS + Custom CSS Modules (Vanilla for high-performance animations)
+- **3D Engine:** Three.js + React Three Fiber + Drei
+- **Motion & Animation:** Framer Motion + GSAP + Lenis Scroll
+- **State Management:** Zustand
+- **Icons:** Lucide React
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🚀 Quick Start
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 1. Prerequisites
+Ensure you have Node.js (v18+) and npm installed on your machine.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 2. Installation
+Clone the repository and install the dependencies:
+```bash
+git clone https://github.com/Cheikhsmb/GlobalTransferUI.git
+cd GlobalTransferUI
+npm install
+```
 
-### `npm run eject`
+### 3. Development Server
+Run the local Vite development server:
+```bash
+npm run dev
+```
+Navigate to `http://localhost:5173` in your browser.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 4. Build for Production
+To create an optimized production build:
+```bash
+npm run build
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 🏛️ Project Architecture
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```text
+src/
+├── components/          # Reusable UI components (Buttons, Cards, Panels)
+│   ├── HeroScene.tsx    # 3D R3F Global Network Scene
+│   ├── TransferPanel.tsx# Core Stablecoin Swap Logic
+│   └── SiteFooter.tsx   # Global Footer
+├── hooks/               # Custom React hooks (useLenis, useMediaQuery)
+├── pages/               # Application Routes (Home, Experience)
+├── store/               # Zustand Global State (useAppStore.ts)
+├── index.css            # Global Theme Tokens & Overrides (Dark/Light)
+└── App.tsx              # Main Application Shell & Routing
+```
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🔒 Smart Contract Integration (Next Steps)
+This UI is currently acting as a high-fidelity conceptual demonstrator. The architecture (`src/store/useAppStore.ts`) has been structured specifically to accept blockchain RPC calls. 
+Future implementations will connect the `TransferPanel` to deployed Solidity smart contracts on the **Ethereum Sepolia Testnet**.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+<p align="center">
+  <i>Projet Blockchain par CAPSI Boyz — Interface conceptuelle.</i>
+</p>
