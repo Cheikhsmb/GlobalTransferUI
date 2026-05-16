@@ -1,38 +1,210 @@
-.App {
-  text-align: center;
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #07121f;
+  color: #f4f7ff;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+body {
+  margin: 0;
   min-height: 100vh;
+  background: radial-gradient(circle at top, #1a3b6c 0%, #07121f 45%);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.App {
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px;
+  background: rgba(15, 25, 45, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  backdrop-filter: blur(12px);
+}
+
+.top-bar {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  margin-bottom: 24px;
+}
+
+.top-bar h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 2.5vw, 2.5rem);
+}
+
+.top-bar p {
+  margin: 8px 0 0;
+  color: #b2c1ff;
+}
+
+.wallet-box {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px 20px;
+  border-radius: 16px;
+  text-align: right;
+  min-width: 240px;
+}
+
+.wallet-label {
+  display: block;
+  color: #8da5ff;
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+}
+
+.tab-list {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.tab-button {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: transparent;
+  color: #dfe7ff;
+  padding: 12px 20px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+
+.tab-button.active,
+.tab-button:hover {
+  border-color: #7c9bff;
+  background: rgba(124, 155, 255, 0.12);
+}
+
+.panel {
+  padding: 16px;
+}
+
+section {
+  margin-bottom: 12px;
+}
+
+h2 {
+  margin-top: 0;
+  color: #f8fbff;
+}
+
+.transfer-form {
+  display: grid;
+  gap: 16px;
+}
+
+.transfer-form label {
+  display: grid;
+  gap: 8px;
+  text-align: left;
+  color: #c8d5ff;
+}
+
+.transfer-form input,
+.transfer-form select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #eef4ff;
+}
+
+.rate-panel {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(12, 24, 46, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.rate-panel span {
+  font-size: 0.95rem;
+  color: #9fb8ff;
+}
+
+.rate-panel strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.1rem;
+}
+
+.primary-button {
+  border: none;
+  background: linear-gradient(135deg, #667cff, #4db1ff);
   color: white;
+  padding: 14px 22px;
+  border-radius: 16px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 160ms ease, box-shadow 160ms ease;
 }
 
-.App-link {
-  color: #61dafb;
+.primary-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(77, 177, 255, 0.24);
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.status-box {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #d6e2ff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.history-list {
+  display: grid;
+  gap: 14px;
+}
+
+.history-item {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(12, 24, 46, 0.95);
+}
+
+.history-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  color: #c6d3ff;
+}
+
+.history-row strong {
+  color: #f8fbff;
+}
+
+@media (max-width: 680px) {
+  .top-bar {
+    flex-direction: column;
+    align-items: stretch;
   }
-  to {
-    transform: rotate(360deg);
+
+  .wallet-box {
+    text-align: left;
   }
 }
