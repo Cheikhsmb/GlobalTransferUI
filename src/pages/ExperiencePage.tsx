@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, ChevronRight, LayoutDashboard } from 'lucide-react';
 import { TransferPanel } from '@/components/TransferPanel';
 import { HistoryPanel } from '@/components/HistoryPanel';
+import { BalancesPanel } from '@/components/BalancesPanel';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SceneFallback } from '@/components/SceneFallback';
@@ -71,6 +72,7 @@ export default function ExperiencePage() {
       </ScrollReveal>
 
       <ScrollReveal className="dashboard-grid" stagger={0.08}>
+        <BalancesPanel />
         <TransferPanel />
         <HistoryPanel />
       </ScrollReveal>

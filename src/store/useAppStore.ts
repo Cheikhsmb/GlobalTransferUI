@@ -1,10 +1,12 @@
 import { create } from 'zustand';
 import {
+  getTokenBalance,
   getXOFBalance,
   getLiveRate,
   executeTransfer as blockchainExecuteTransfer,
   fetchTransferHistory,
 } from '@/lib/blockchain';
+import { CONTRACT_ADDRESSES } from '@/config/contracts';
 
 export type Transaction = {
   id: string;
@@ -23,6 +25,8 @@ type AppState = {
   transactions: Transaction[];
   status: string;
   xofBalance: string;
+  eurBalance: string;
+  usdBalance: string;
   isPending: boolean;
   lastTxHash: string;
   rates: { EUR: number; USD: number };
@@ -42,6 +46,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   transactions: [],
   status: 'Prêt à explorer',
   xofBalance: '0',
+  eurBalance: '0',
+  usdBalance: '0',
   isPending: false,
   lastTxHash: '',
   rates: { EUR: 655.957, USD: 598 },
@@ -55,13 +61,11 @@ export const useAppStore = create<AppState>((set, get) => ({
       const accounts: string[] = await window.ethereum.request({ method: 'eth_requestAccounts' });
       const account = accounts[0];
       set({ account, status: 'MetaMask connecté' });
-      // load balance, rates and history after connecting
-      const [balance] = await Promise.all([
-        getXOFBalance(account),
+      await Promise.all([
+        get().refreshBalance(),
         get().refreshRates(),
         get().fetchHistory(),
       ]);
-      set({ xofBalance: balance });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       set({ status: msg.includes('Sepolia') ? msg : 'Connexion annulée' });
@@ -72,8 +76,12 @@ export const useAppStore = create<AppState>((set, get) => ({
     const { account } = get();
     if (!account) return;
     try {
-      const balance = await getXOFBalance(account);
-      set({ xofBalance: balance });
+      const [xof, eur, usd] = await Promise.all([
+        getXOFBalance(account),
+        getTokenBalance(CONTRACT_ADDRESSES.EURToken, account),
+        getTokenBalance(CONTRACT_ADDRESSES.USDToken, account),
+      ]);
+      set({ xofBalance: xof, eurBalance: eur, usdBalance: usd });
     } catch {
       // silently ignore read errors
     }

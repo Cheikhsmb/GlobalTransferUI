@@ -23,11 +23,15 @@ async function getSigner() {
   return provider.getSigner();
 }
 
-export async function getXOFBalance(account: string): Promise<string> {
+export async function getTokenBalance(tokenAddress: string, account: string): Promise<string> {
   const provider = getProvider();
-  const xof = new Contract(CONTRACT_ADDRESSES.XOFToken, ERC20_ABI, provider);
-  const raw: bigint = await xof.balanceOf(account);
+  const token = new Contract(tokenAddress, ERC20_ABI, provider);
+  const raw: bigint = await token.balanceOf(account);
   return formatUnits(raw, 18);
+}
+
+export async function getXOFBalance(account: string): Promise<string> {
+  return getTokenBalance(CONTRACT_ADDRESSES.XOFToken, account);
 }
 
 export async function getLiveRate(targetCurrency: 'EUR' | 'USD'): Promise<number> {
@@ -58,36 +62,66 @@ export async function fetchTransferHistory(account: string): Promise<Transaction
   const currentBlock = await provider.getBlockNumber();
   const fromBlock = Math.max(0, currentBlock - 50_000);
 
-  const filter = manager.filters.TransferInitiated(account);
-  const events = await manager.queryFilter(filter, fromBlock);
+  const [sentEvents, receivedEvents] = await Promise.all([
+    manager.queryFilter(manager.filters.TransferInitiated(account), fromBlock),
+    manager.queryFilter(manager.filters.TransferCompleted(account), fromBlock),
+  ]);
 
-  const txns: Transaction[] = await Promise.all(
-    events.map(async (ev) => {
-      const block = await provider.getBlock(ev.blockNumber);
-      const timestamp = block?.timestamp ?? Math.floor(Date.now() / 1000);
-      const date = new Date(timestamp * 1000).toLocaleString('fr-FR', {
-        hour: '2-digit', minute: '2-digit',
-        day: '2-digit', month: '2-digit', year: 'numeric',
-      });
+  const blockCache = new Map<number, number>();
+  async function getTimestamp(blockNumber: number): Promise<number> {
+    if (blockCache.has(blockNumber)) return blockCache.get(blockNumber)!;
+    const block = await provider.getBlock(blockNumber);
+    const ts = block?.timestamp ?? Math.floor(Date.now() / 1000);
+    blockCache.set(blockNumber, ts);
+    return ts;
+  }
 
+  function toDate(ts: number) {
+    return new Date(ts * 1000).toLocaleString('fr-FR', {
+      hour: '2-digit', minute: '2-digit',
+      day: '2-digit', month: '2-digit', year: 'numeric',
+    });
+  }
+
+  const sent: Transaction[] = await Promise.all(
+    sentEvents.map(async (ev) => {
+      const ts = await getTimestamp(ev.blockNumber);
       const log = ev as unknown as { args: { amountXOF: bigint; targetToken: string; recipient: string } };
-      const amountXOF = formatUnits(log.args.amountXOF, 18);
       const targetAddr = log.args.targetToken.toLowerCase();
       const targetCurrency = targetAddr === TOKEN_ADDRESS.EUR.toLowerCase() ? 'EUR' : 'USD';
-
       return {
         id: ev.transactionHash,
-        amount: Number(amountXOF).toFixed(2),
+        amount: Number(formatUnits(log.args.amountXOF, 18)).toFixed(2),
         recipient: log.args.recipient,
-        sourceCurrency: 'XOF',
+        sourceCurrency: 'XOF' as const,
         targetCurrency,
         rate: 0,
-        status: 'Confirmé',
-        date,
+        status: 'Envoyé',
+        date: toDate(ts),
         txHash: ev.transactionHash,
-      } satisfies Transaction;
+      };
     }),
   );
 
-  return txns.reverse();
+  const received: Transaction[] = await Promise.all(
+    receivedEvents.map(async (ev) => {
+      const ts = await getTimestamp(ev.blockNumber);
+      const log = ev as unknown as { args: { amountTarget: bigint; targetToken: string; recipient: string } };
+      const targetAddr = log.args.targetToken.toLowerCase();
+      const currency = targetAddr === TOKEN_ADDRESS.EUR.toLowerCase() ? 'EUR' : 'USD';
+      return {
+        id: `recv-${ev.transactionHash}`,
+        amount: Number(formatUnits(log.args.amountTarget, 18)).toFixed(4),
+        recipient: account,
+        sourceCurrency: currency as 'EUR' | 'USD',
+        targetCurrency: currency as 'EUR' | 'USD',
+        rate: 0,
+        status: 'Reçu',
+        date: toDate(ts),
+        txHash: ev.transactionHash,
+      };
+    }),
+  );
+
+  return [...sent, ...received].sort((a, b) => b.date.localeCompare(a.date));
 }

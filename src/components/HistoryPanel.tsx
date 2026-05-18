@@ -36,8 +36,17 @@ export function HistoryPanel() {
             className="history-item"
           >
             <div className="history-item__line">
-              <span>{Number(transaction.amount).toLocaleString('fr-FR')} {transaction.sourceCurrency} → {transaction.targetCurrency}</span>
-              <strong style={{ color: transaction.status === 'Confirmé' ? '#00e5ff' : '#fbbf24' }}>
+              <span>
+                {transaction.status === 'Reçu'
+                  ? `+${Number(transaction.amount).toLocaleString('fr-FR')} ${transaction.targetCurrency}`
+                  : `${Number(transaction.amount).toLocaleString('fr-FR')} XOF → ${transaction.targetCurrency}`
+                }
+              </span>
+              <strong style={{
+                color: transaction.status === 'Reçu' ? '#34d399'
+                     : transaction.status === 'Envoyé' ? '#00e5ff'
+                     : '#fbbf24',
+              }}>
                 {transaction.status}
               </strong>
             </div>
