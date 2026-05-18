@@ -1,4 +1,10 @@
 import { create } from 'zustand';
+import {
+  getXOFBalance,
+  getLiveRate,
+  executeTransfer as blockchainExecuteTransfer,
+  fetchTransferHistory,
+} from '@/lib/blockchain';
 
 export type Transaction = {
   id: string;
@@ -9,85 +15,132 @@ export type Transaction = {
   rate: number;
   status: string;
   date: string;
+  txHash?: string;
 };
 
 type AppState = {
   account: string;
   transactions: Transaction[];
   status: string;
+  xofBalance: string;
+  isPending: boolean;
+  lastTxHash: string;
+  rates: { EUR: number; USD: number };
   connectWallet: () => Promise<void>;
-  addTransaction: (transaction: Omit<Transaction, 'id' | 'date' | 'status'>) => void;
+  executeTransfer: (params: {
+    amount: string;
+    recipient: string;
+    targetCurrency: 'EUR' | 'USD';
+  }) => Promise<void>;
+  fetchHistory: () => Promise<void>;
+  refreshBalance: () => Promise<void>;
+  refreshRates: () => Promise<void>;
 };
 
-const initialHistory: Transaction[] = [
-  {
-    id: 'tx-001',
-    amount: '12500',
-    recipient: '0xB2a4...98A1',
-    sourceCurrency: 'XOF',
-    targetCurrency: 'EUR',
-    rate: 0.0015,
-    status: 'Finalisé',
-    date: '2026-05-11 14:28',
-  },
-  {
-    id: 'tx-002',
-    amount: '8200',
-    recipient: '0xD3f6...21Cd',
-    sourceCurrency: 'XOF',
-    targetCurrency: 'USD',
-    rate: 0.0017,
-    status: 'Finalisé',
-    date: '2026-05-09 09:12',
-  },
-  {
-    id: 'tx-003',
-    amount: '50',
-    recipient: '0xE4a1...71Fb',
-    sourceCurrency: 'USD',
-    targetCurrency: 'XOF',
-    rate: 588.23,
-    status: 'Finalisé',
-    date: '2026-05-09 09:12',
-  },
-];
-
-export const useAppStore = create<AppState>((set) => ({
+export const useAppStore = create<AppState>((set, get) => ({
   account: '',
-  transactions: initialHistory,
+  transactions: [],
   status: 'Prêt à explorer',
+  xofBalance: '0',
+  isPending: false,
+  lastTxHash: '',
+  rates: { EUR: 655.957, USD: 598 },
+
   connectWallet: async () => {
-    if (window.ethereum && window.ethereum.request) {
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        set({ account: accounts[0], status: 'MetaMask connecté' });
-      } catch {
-        set({ status: 'Connexion annulée. Utilisation d’une adresse de démonstration.' });
-      }
-    } else {
-      set({ account: '0xF4a7...C9d2', status: 'Adresse de démonstration active' });
+    if (!window.ethereum?.request) {
+      set({ status: 'MetaMask non détecté' });
+      return;
+    }
+    try {
+      const accounts: string[] = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const account = accounts[0];
+      set({ account, status: 'MetaMask connecté' });
+      // load balance, rates and history after connecting
+      const [balance] = await Promise.all([
+        getXOFBalance(account),
+        get().refreshRates(),
+        get().fetchHistory(),
+      ]);
+      set({ xofBalance: balance });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      set({ status: msg.includes('Sepolia') ? msg : 'Connexion annulée' });
     }
   },
-  addTransaction: ({ amount, sourceCurrency, targetCurrency, recipient, rate }) => {
-    const next: Transaction = {
-      id: `tx-${Date.now()}`,
-      amount,
-      sourceCurrency,
-      targetCurrency,
-      recipient,
-      rate,
-      status: 'Transfert simulé',
-      date: new Date().toLocaleString('fr-FR', {
-        hour: '2-digit',
-        minute: '2-digit',
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      }),
-    };
-    set((state) => ({
-      transactions: [next, ...state.transactions],
-      status: 'Nouveau transfert simulé ajouté',
-    }));
+
+  refreshBalance: async () => {
+    const { account } = get();
+    if (!account) return;
+    try {
+      const balance = await getXOFBalance(account);
+      set({ xofBalance: balance });
+    } catch {
+      // silently ignore read errors
+    }
+  },
+
+  refreshRates: async () => {
+    try {
+      const [eurRate, usdRate] = await Promise.all([getLiveRate('EUR'), getLiveRate('USD')]);
+      set({ rates: { EUR: eurRate, USD: usdRate } });
+    } catch {
+      // keep fallback rates
+    }
+  },
+
+  fetchHistory: async () => {
+    const { account } = get();
+    if (!account) return;
+    try {
+      const txns = await fetchTransferHistory(account);
+      set({ transactions: txns });
+    } catch {
+      // silently ignore
+    }
+  },
+
+  executeTransfer: async ({ amount, recipient, targetCurrency }) => {
+    const { account } = get();
+    if (!account) {
+      set({ status: "Connectez d'abord votre portefeuille" });
+      return;
+    }
+    set({ isPending: true, status: 'Transaction en attente de confirmation…' });
+    try {
+      const txHash = await blockchainExecuteTransfer(recipient, amount, targetCurrency);
+      const date = new Date().toLocaleString('fr-FR', {
+        hour: '2-digit', minute: '2-digit',
+        day: '2-digit', month: '2-digit', year: 'numeric',
+      });
+      const newTx: Transaction = {
+        id: txHash,
+        amount,
+        recipient,
+        sourceCurrency: 'XOF',
+        targetCurrency,
+        rate: get().rates[targetCurrency],
+        status: 'Confirmé',
+        date,
+        txHash,
+      };
+      set((state) => ({
+        transactions: [newTx, ...state.transactions],
+        lastTxHash: txHash,
+        status: 'Transfert confirmé sur Sepolia',
+        isPending: false,
+      }));
+      await get().refreshBalance();
+    } catch (err: unknown) {
+      const raw = err instanceof Error ? err.message : String(err);
+      const msg = raw.includes('user rejected')
+        ? 'Transaction annulée par l\'utilisateur'
+        : raw.includes('insufficient')
+        ? 'Solde XOF insuffisant'
+        : raw.includes('Sepolia')
+        ? raw
+        : 'Erreur lors du transfert';
+      set({ isPending: false, status: msg });
+      throw new Error(msg);
+    }
   },
 }));
