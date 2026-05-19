@@ -25,9 +25,24 @@ async function getSigner() {
 
 export async function getTokenBalance(tokenAddress: string, account: string): Promise<string> {
   const provider = getProvider();
+  const network = await provider.getNetwork();
+  if (Number(network.chainId) !== SEPOLIA_CHAIN_ID) {
+    throw new Error(`Switch MetaMask to Sepolia: detected chainId ${network.chainId}`);
+  }
+
   const token = new Contract(tokenAddress, ERC20_ABI, provider);
   const raw: bigint = await token.balanceOf(account);
-  return formatUnits(raw, 18);
+  const decimals: number = await token.decimals();
+
+  console.log('getTokenBalance', {
+    tokenAddress,
+    account,
+    raw: raw.toString(),
+    decimals,
+    network: network.chainId,
+  });
+
+  return formatUnits(raw, decimals);
 }
 
 export async function getXOFBalance(account: string): Promise<string> {

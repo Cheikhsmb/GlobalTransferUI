@@ -30,6 +30,7 @@ type AppState = {
   isPending: boolean;
   lastTxHash: string;
   rates: { EUR: number; USD: number };
+  pollingInterval?: NodeJS.Timeout;
   connectWallet: () => Promise<void>;
   executeTransfer: (params: {
     amount: string;
@@ -39,6 +40,8 @@ type AppState = {
   fetchHistory: () => Promise<void>;
   refreshBalance: () => Promise<void>;
   refreshRates: () => Promise<void>;
+  setupPolling: () => void;
+  clearPolling: () => void;
 };
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -66,6 +69,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         get().refreshRates(),
         get().fetchHistory(),
       ]);
+      get().setupPolling();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       set({ status: msg.includes('Sepolia') ? msg : 'Connexion annulée' });
@@ -82,8 +86,8 @@ export const useAppStore = create<AppState>((set, get) => ({
         getTokenBalance(CONTRACT_ADDRESSES.USDToken, account),
       ]);
       set({ xofBalance: xof, eurBalance: eur, usdBalance: usd });
-    } catch {
-      // silently ignore read errors
+    } catch (err: unknown) {
+      console.error('refreshBalance failed', err);
     }
   },
 
@@ -149,6 +153,28 @@ export const useAppStore = create<AppState>((set, get) => ({
         : 'Erreur lors du transfert';
       set({ isPending: false, status: msg });
       throw new Error(msg);
+    }
+  },
+
+  setupPolling: () => {
+    const state = get();
+    if (state.pollingInterval) return; // already polling
+
+    const interval = setInterval(() => {
+      get().refreshBalance();
+      get().fetchHistory();
+    }, 15000); // refresh every 15 seconds
+
+    set({ pollingInterval: interval });
+    console.log('polling started');
+  },
+
+  clearPolling: () => {
+    const state = get();
+    if (state.pollingInterval) {
+      clearInterval(state.pollingInterval);
+      set({ pollingInterval: undefined });
+      console.log('polling stopped');
     }
   },
 }));
