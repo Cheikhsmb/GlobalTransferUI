@@ -16,7 +16,7 @@ export function SiteFooter() {
         <div>
           <p className="site-footer__brand">
             <Globe2 size={14} style={{ display: 'inline', marginRight: '0.35rem', color: '#00e5ff' }} />
-            XOF Transfer
+            GlobalTransfer
           </p>
           <p className="site-footer__tagline">
             Transferts stablecoin premium pour les marchés XOF — propulsé par la blockchain Sepolia.
@@ -32,7 +32,7 @@ export function SiteFooter() {
         </nav>
 
         <div className="site-footer__social">
-          <a href="mailto:contact@xoftransfer.app" className="site-footer__icon" aria-label="Email">
+          <a href="mailto:contact@globaltransfer.app" className="site-footer__icon" aria-label="Email">
             <Mail size={16} />
           </a>
           <a href="#" className="site-footer__icon" aria-label="LinkedIn">
@@ -45,7 +45,7 @@ export function SiteFooter() {
       </div>
 
       <p className="site-footer__legal">
-        © {new Date().getFullYear()} XOF Transfer — Projet Blockchain par CAPSI Boyz. Interface conceptuelle.
+        © {new Date().getFullYear()} GlobalTransfer — Projet Blockchain par CAPSI Boyz. Interface conceptuelle.
       </p>
     </footer>
   );

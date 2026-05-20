@@ -6,7 +6,7 @@ import { ScrollReveal } from '@/components/ScrollReveal';
 
 const testimonials = [
   {
-    quote: 'XOF Transfer transforme nos flux transfrontaliers en une expérience digne des meilleures fintechs mondiales.',
+    quote: 'GlobalTransfer transforme nos flux transfrontaliers en une expérience digne des meilleures fintechs mondiales.',
     author: 'Aminata Diallo',
     role: 'Directrice trésorerie, Dakar',
     initials: 'AD',

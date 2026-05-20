@@ -58,7 +58,7 @@ export function LoadingScreen({ onComplete, minDuration = 2200 }: LoadingScreenP
             transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
           />
           <div className="loading-screen__content">
-            <p className="loading-screen__eyebrow">XOF Transfer</p>
+            <p className="loading-screen__eyebrow">GlobalTransfer</p>
             <h2 className="loading-screen__title">Initialisation du flux</h2>
             <motion.div
               className="loading-screen__bar"

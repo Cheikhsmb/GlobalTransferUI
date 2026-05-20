@@ -1,5 +1,5 @@
 {
-  "name": "xof-transfer",
+  "name": "global-transfer",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -7,7 +7,7 @@
     "@react-three/fiber": "^9.0.0",
     "@studio-freight/lenis": "^1.0.42",
     "clsx": "^2.1.1",
-    "ethers": "^6.10.0",
+    "ethers": "^5.8.0",
     "framer-motion": "^11.0.0",
     "gsap": "^3.12.2",
     "lenis": "^1.3.23",

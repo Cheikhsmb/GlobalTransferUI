@@ -55,7 +55,7 @@ function App() {
             <Globe2 size={18} />
           </div>
           <div>
-            <p className="brand__label">XOF Transfer</p>
+            <p className="brand__label">GlobalTransfer</p>
             <p className="brand__subtext">Stablecoin premium</p>
           </div>
         </NavLink>
